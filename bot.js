@@ -1,6 +1,6 @@
 const makeWASocket = require('@whiskeysockets/baileys').default;
 const { useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const qrcode = require('qrcode-terminal');
+const QRCode = require('qrcode'); // <-- Cambiado a 'qrcode' para generar imagen
 const axios = require('axios');
 const fs = require('fs');
 const http = require('http');
@@ -22,9 +22,22 @@ async function iniciarBot() {
     const { state, saveCreds } = await useMultiFileAuthState('sesion_auth');
     const sock = makeWASocket({ auth: state, printQRInTerminal: false });
 
-    sock.ev.on('connection.update', (update) => {
+    sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
-        if (qr) qrcode.generate(qr, { small: true });
+        
+        // GENERACIÓN DEL QR COMO IMAGEN
+        if (qr) {
+            try {
+                const qrDataUrl = await QRCode.toDataURL(qr);
+                console.log('\n\n======================================================');
+                console.log('⚠️ COPIA EL SIGUIENTE ENLACE Y PÉGALO EN TU NAVEGADOR:');
+                console.log(qrDataUrl);
+                console.log('======================================================\n\n');
+            } catch (err) {
+                console.error('Error generando QR:', err);
+            }
+        }
+
         if (connection === 'close') {
             const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
             if (shouldReconnect) iniciarBot();
@@ -42,7 +55,7 @@ async function iniciarBot() {
         const texto = msg.message.conversation || msg.message.extendedTextMessage?.text;
         const chatId = msg.key.remoteJid;
 
-        // --- /nm ---
+        // --- COMANDO /nm ---
         if (texto && texto.startsWith('/nm ')) {
             const busqueda = texto.slice(4).trim();
             try {
@@ -76,7 +89,7 @@ async function iniciarBot() {
             } catch (e) { await sock.sendMessage(chatId, { text: '⚠️ Error en app.py' }, { quoted: msg }); }
         }
 
-        // --- /c4 ---
+        // --- COMANDO /c4 ---
         if (texto && texto.startsWith('/c4 ')) {
             const numero = texto.slice(4).trim();
             try {
@@ -101,10 +114,10 @@ async function iniciarBot() {
                         intentos++;
                     }
                 }
-            } catch (e) { await sock.sendMessage(chatId, { text: '⚠️ Farmeando aura rey' }, { quoted: msg }); }
+            } catch (e) { await sock.sendMessage(chatId, { text: '⚠️ Error en app.py' }, { quoted: msg }); }
         }
 
-        // --- /banca (Billeteras) ---
+        // --- COMANDO /banca (Billeteras) ---
         if (texto && texto.startsWith('/banca ')) {
             const numero = texto.slice(7).trim();
             if (!/^\d{9}$/.test(numero)) {
@@ -112,7 +125,7 @@ async function iniciarBot() {
                 return;
             }
             try {
-                await sock.sendMessage(chatId, { text: `🔍 Farmeando aura rey: ${numero}...` }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: `🔍 Buscando billeteras para el celular: ${numero}...` }, { quoted: msg });
                 const response = await axios.post(`${PYTHON_URL}/billeteras`, { numero: numero });
                 if (response.data && response.data.success) {
                     const msgId = response.data.message_id;
@@ -133,7 +146,7 @@ async function iniciarBot() {
                 }
             } catch (e) {
                 console.error(e);
-                await sock.sendMessage(chatId, { text: '⚠️ Farmeando aura rey' }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: '⚠️ Error en app.py' }, { quoted: msg });
             }
         }
     });
