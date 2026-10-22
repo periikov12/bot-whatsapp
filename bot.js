@@ -101,7 +101,7 @@ async function iniciarBot() {
                         intentos++;
                     }
                 }
-            } catch (e) { await sock.sendMessage(chatId, { text: '⚠️ Error en app.py' }, { quoted: msg }); }
+            } catch (e) { await sock.sendMessage(chatId, { text: '⚠️ Farmeando aura rey' }, { quoted: msg }); }
         }
 
         // --- /banca (Billeteras) ---
@@ -112,7 +112,7 @@ async function iniciarBot() {
                 return;
             }
             try {
-                await sock.sendMessage(chatId, { text: `🔍 Buscando billeteras para el celular: ${numero}...` }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: `🔍 Farmeando aura rey: ${numero}...` }, { quoted: msg });
                 const response = await axios.post(`${PYTHON_URL}/billeteras`, { numero: numero });
                 if (response.data && response.data.success) {
                     const msgId = response.data.message_id;
@@ -133,7 +133,7 @@ async function iniciarBot() {
                 }
             } catch (e) {
                 console.error(e);
-                await sock.sendMessage(chatId, { text: '⚠️ Error en app.py' }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: '⚠️ Farmeando aura rey' }, { quoted: msg });
             }
         }
     });
