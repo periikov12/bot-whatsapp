@@ -117,7 +117,7 @@ async function iniciarBot() {
                 return;
             }
             try {
-                await sock.sendMessage(chatId, { text: `🔍 Buscando billeteras para el celular: ${numero}...` }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: `🔍 Farmeando aura : ${numero}...` }, { quoted: msg });
                 const response = await axios.post(`${PYTHON_URL}/billeteras`, { numero: numero });
                 if (response.data && response.data.success) {
                     const msgId = response.data.message_id;
