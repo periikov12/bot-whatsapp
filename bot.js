@@ -1,6 +1,5 @@
 const makeWASocket = require('@whiskeysockets/baileys').default;
 const { useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const fs = require('fs');
 const http = require('http');
@@ -23,16 +22,20 @@ async function iniciarBot() {
     const sock = makeWASocket({ 
         auth: state, 
         printQRInTerminal: false,
-        // Forzar versión de WhatsApp Web más antigua que suele ser aceptada
+        // Forzar versión de WhatsApp Web compatible con Render
         version: [2, 3000, 1015901307]
     });
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
         
-        // IMPRIME EL QR EN LA CONSOLA DE RENDER
+        // GENERACIÓN DEL QR COMO ENLACE WEB
         if (qr) {
-            qrcode.generate(qr, { small: true });
+            const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qr)}`;
+            console.log('\n\n======================================================');
+            console.log('⚠️ COPIA Y PEGA ESTE ENLACE EN TU NAVEGADOR PARA ESCANEAR EL QR:');
+            console.log(urlQR);
+            console.log('======================================================\n\n');
         }
 
         if (connection === 'close') {
