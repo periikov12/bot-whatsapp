@@ -1,6 +1,6 @@
 const makeWASocket = require('@whiskeysockets/baileys').default;
 const { useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const QRCode = require('qrcode'); // <-- Cambiado a 'qrcode' para generar imagen
+const qrcode = require('qrcode-terminal'); // <-- Usamos el generador en consola
 const axios = require('axios');
 const fs = require('fs');
 const http = require('http');
@@ -22,20 +22,12 @@ async function iniciarBot() {
     const { state, saveCreds } = await useMultiFileAuthState('sesion_auth');
     const sock = makeWASocket({ auth: state, printQRInTerminal: false });
 
-    sock.ev.on('connection.update', async (update) => {
+    sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
         
-        // GENERACIÓN DEL QR COMO IMAGEN
+        // IMPRIME EL QR EN LA CONSOLA DE RENDER
         if (qr) {
-            try {
-                const qrDataUrl = await QRCode.toDataURL(qr);
-                console.log('\n\n======================================================');
-                console.log('⚠️ COPIA EL SIGUIENTE ENLACE Y PÉGALO EN TU NAVEGADOR:');
-                console.log(qrDataUrl);
-                console.log('======================================================\n\n');
-            } catch (err) {
-                console.error('Error generando QR:', err);
-            }
+            qrcode.generate(qr, { small: true });
         }
 
         if (connection === 'close') {
