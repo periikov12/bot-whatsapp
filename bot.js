@@ -1,6 +1,6 @@
 const makeWASocket = require('@whiskeysockets/baileys').default;
 const { useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const qrcode = require('qrcode-terminal'); // <-- Usamos el generador en consola
+const qrcode = require('qrcode-terminal');
 const axios = require('axios');
 const fs = require('fs');
 const http = require('http');
@@ -20,7 +20,12 @@ const PYTHON_URL = process.env.PYTHON_URL || 'http://localhost:5000';
 
 async function iniciarBot() {
     const { state, saveCreds } = await useMultiFileAuthState('sesion_auth');
-    const sock = makeWASocket({ auth: state, printQRInTerminal: false });
+    const sock = makeWASocket({ 
+        auth: state, 
+        printQRInTerminal: false,
+        // Forzar versión de WhatsApp Web más antigua que suele ser aceptada
+        version: [2, 3000, 1015901307]
+    });
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
@@ -117,7 +122,7 @@ async function iniciarBot() {
                 return;
             }
             try {
-                await sock.sendMessage(chatId, { text: `🔍 Farmeando aura : ${numero}...` }, { quoted: msg });
+                await sock.sendMessage(chatId, { text: `🔍 Buscando billeteras para el celular: ${numero}...` }, { quoted: msg });
                 const response = await axios.post(`${PYTHON_URL}/billeteras`, { numero: numero });
                 if (response.data && response.data.success) {
                     const msgId = response.data.message_id;
